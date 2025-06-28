@@ -45,17 +45,3 @@
     drawPixel(e.offsetX, e.offsetY);
   });
   canvas.addEventListener('mouseup', e => {
-    drawing = false;
-  });
-  canvas.addEventListener('mouseleave', e => {
-    drawing = false;
-  });
-  canvas.addEventListener('mousemove', e => {
-    if (drawing) drawPixel(e.offsetX, e.offsetY);
-  });
-
-  // Dokunmatik için
-  canvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    for(let touch of 
