@@ -1,64 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Pixel Planet</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-        body { margin: 0; padding: 0; }
-        #map { height: 100vh; width: 100%; }
-    </style>
+<meta charset="UTF-8">
+<title>Pixel Planet Clone Full</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+  body {
+    background: #111;
+    color: #fff;
+    font-family: sans-serif;
+    text-align: center;
+    margin: 0;
+    overflow: hidden;
+  }
+  #toolbar {
+    padding: 5px;
+    background: #222;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 2;
+  }
+  canvas {
+    display: block;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution_gray_blue.png/800px-World_map_-_low_resolution_gray_blue.png') center center / contain no-repeat;
+    margin-top: 50px;
+    cursor: crosshair;
+  }
+</style>
 </head>
 <body>
-    <div id="map"></div>
 
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script>
-        var map = L.map('map').setView([20, 0], 2);
+<div id="toolbar">
+  <input type="color" id="colorPicker" value="#ff0000">
+  <button onclick="clearCanvas()">Sıfırla</button>
+  <span id="coords"></span>
+</div>
 
-        // Pixel Planet tarzı minimalist gri harita
-        L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            attribution: '© Stadia Maps, © OpenMapTiles, © OpenStreetMap'
-        }).addTo(map);
+<canvas id="canvas" width="800" height="400"></canvas>
 
-        // Ülke sınır çizgilerini ekle
-        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
-            .then(res => res.json())
-            .then(data => {
-                L.geoJSON(data, {
-                    style: {
-                        color: "#555",
-                        weight: 1,
-                        fillOpacity: 0
-                    }
-                }).addTo(map);
-            });
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const colorPicker = document.getElementById("colorPicker");
+const coordsText = document.getElementById("coords");
 
-        // localStorage'dan kayıtlı pixel'leri yükle
-        var pixels = JSON.parse(localStorage.getItem('pixels') || '[]');
-        pixels.forEach(function(latlng) {
-            L.circleMarker(latlng, {
-                radius: 3,
-                color: '#3498db',
-                fillColor: '#3498db',
-                fillOpacity: 0.9
-            }).addTo(map);
-        });
+let scale = 1;
+let offsetX = 0;
+let offsetY = 0;
+let isPanning = false;
+let startX, startY;
 
-        // Tıklayınca pixel ekle ve kaydet
-        map.on('click', function(e) {
-            L.circleMarker(e.latlng, {
-                radius: 3,
-                color: '#3498db',
-                fillColor: '#3498db',
-                fillOpacity: 0.9
-            }).addTo(map);
+const gridSize = 1;
+const pixelData = JSON.parse(localStorage.getItem("pixelData")) || {};
 
-            pixels.push(e.latlng);
-            localStorage.setItem('pixels', JSON.stringify(pixels));
-        });
-    </script>
+function drawGrid() {
+  const step = gridSize;
+  ctx.beginPath();
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  for (let x = -offsetX % (step*scale); x < canvas.width; x += step*scale) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+  }
+  for (let y = -offsetY % (step*scale); y < canvas.height; y += step*scale) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+  }
+  ctx.stroke();
+}
+
+function drawPixels() {
+  for (const key in pixelData) {
+    const [x,y] = key.split(",").map(Number);
+    ctx.fillStyle = pixelData[key];
+    ctx.fillRect((x*scale)+offsetX, (y*scale)+offsetY, scale, scale);
+  }
+}
+
+function render() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawPixels();
+  drawGrid();
+}
+
+canvas.addEventListener("mousedown", e => {
+  if (e.button === 1) { // orta mouse panning
+    isPanning = true;
+    startX = e.clientX;
+    startY = e.clientY;
+  } else {
+    const [x,y] = getRealCoords(e.offsetX, e.offsetY);
+    setPixel(x,y,colorPicker.value);
+  }
+});
+
+canvas.addEventListener("mousemove", e => {
+  if (isPanning) {
+    offsetX += e.clientX - startX;
+    offsetY += e.clientY - startY;
+    startX = e.clientX;
+    startY = e.clientY;
+    render();
+  }
+  const [rx,ry] = getRealCoords(e.offsetX,e.offsetY);
+  coordsText.textContent = `X:${rx}, Y:${ry}`;
+});
+
+canvas.addEventListener("mouseup", ()=> isPanning = false);
+canvas.addEventListener("mouseout", ()=> isPanning = false);
+
+canvas.addEventListener("click", e => {
+  const [x,y] = getRealCoords(e.offsetX, e.offsetY);
+  setPixel(x,y,colorPicker.value);
+});
+
+canvas.addEventListener("wheel", e => {
+  e.preventDefault();
+  const zoom = e.deltaY < 0 ? 1.1 : 0.9;
+  scale *= zoom;
+  offsetX = e.offsetX - (e.offsetX - offsetX) * zoom;
+  offsetY = e.offsetY - (e.offsetY - offsetY) * zoom;
+  render();
+});
+
+function getRealCoords(screenX, screenY) {
+  return [
+    Math.floor((screenX - offsetX) / scale),
+    Math.floor((screenY - offsetY) / scale)
+  ];
+}
+
+function setPixel(x,y,color) {
+  pixelData[`${x},${y}`] = color;
+  localStorage.setItem("pixelData", JSON.stringify(pixelData));
+  render();
+}
+
+function clearCanvas() {
+  localStorage.removeItem("pixelData");
+  for (let key in pixelData) delete pixelData[key];
+  render();
+}
+
+render();
+</script>
 </body>
 </html>
