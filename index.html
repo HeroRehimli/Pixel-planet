@@ -1,61 +1,92 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Pixel Planet</title>
+    <title>Pixel Planet Clone</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
+        body { margin: 0; padding: 0; }
         #map { height: 100vh; width: 100%; }
+        #colors {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 5px;
+            border-radius: 8px;
+            display: flex;
+            gap: 5px;
+            z-index: 1000;
+        }
+        .color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #aaa;
+        }
     </style>
 </head>
 <body>
+    <div id="colors"></div>
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
+        // Harita
         var map = L.map('map').setView([20, 0], 2);
 
-        // Pixel Planet tarzı minimalist gri harita
+        // Pixel Planet tarzı gri tile
         L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            attribution: '© Stadia Maps, © OpenMapTiles, © OpenStreetMap'
+            maxZoom: 19
         }).addTo(map);
 
-        // Ülke sınır çizgileri (GeoJSON)
+        // Ülke sınırları
         fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
             .then(res => res.json())
             .then(data => {
                 L.geoJSON(data, {
-                    style: {
-                        color: "#555",
-                        weight: 1,
-                        fillOpacity: 0
-                    }
+                    style: { color: "#555", weight: 1, fillOpacity: 0 }
                 }).addTo(map);
             });
 
-        // localStorage'dan pixel'leri yükle
+        // Renk paleti
+        var colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff", "#000000", "#ffffff"];
+        var currentColor = colors[0];
+        var colorContainer = document.getElementById("colors");
+
+        colors.forEach(function(color) {
+            var div = document.createElement("div");
+            div.className = "color";
+            div.style.background = color;
+            div.onclick = function() {
+                currentColor = color;
+            }
+            colorContainer.appendChild(div);
+        });
+
+        // localStorage yükle
         var pixels = JSON.parse(localStorage.getItem('pixels') || '[]');
-        pixels.forEach(function(latlng) {
-            L.circleMarker(latlng, {
+        pixels.forEach(function(p) {
+            L.circleMarker([p.lat, p.lng], {
                 radius: 3,
-                color: '#3498db',
-                fillColor: '#3498db',
+                color: p.color,
+                fillColor: p.color,
                 fillOpacity: 0.9
             }).addTo(map);
         });
 
-        // Haritaya tıklayınca pixel ekle ve kaydet
+        // Tıklayınca pixel ekle
         map.on('click', function(e) {
             L.circleMarker(e.latlng, {
                 radius: 3,
-                color: '#3498db',
-                fillColor: '#3498db',
+                color: currentColor,
+                fillColor: currentColor,
                 fillOpacity: 0.9
             }).addTo(map);
 
-            pixels.push(e.latlng);
+            pixels.push({ lat: e.latlng.lat, lng: e.latlng.lng, color: currentColor });
             localStorage.setItem('pixels', JSON.stringify(pixels));
         });
     </script>
