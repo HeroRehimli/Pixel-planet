@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -44,38 +44,3 @@
     ctx.fillRect(Math.floor(x/size)*size, Math.floor(y/size)*size, size, size);
   }
 
-  // Mouse events
-  canvas.addEventListener('mousedown', e => { 
-    drawing = true; 
-    drawPixel(e.offsetX, e.offsetY); 
-  });
-  canvas.addEventListener('mouseup', () => drawing = false);
-  canvas.addEventListener('mouseleave', () => drawing = false);
-  canvas.addEventListener('mousemove', e => { 
-    if (drawing) drawPixel(e.offsetX, e.offsetY); 
-  });
-
-  // Touch events
-  canvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    drawing = true;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.touches[0].clientX - rect.left;
-    const y = e.touches[0].clientY - rect.top;
-    drawPixel(x, y);
-  }, {passive: false});
-
-  canvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    if (!drawing) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.touches[0].clientX - rect.left;
-    const y = e.touches[0].clientY - rect.top;
-    drawPixel(x, y);
-  }, {passive: false});
-
-  canvas.addEventListener('touchend', () => drawing = false);
-  canvas.addEventListener('touchcancel', () => drawing = false);
-</script>
-</body>
-  </html>
