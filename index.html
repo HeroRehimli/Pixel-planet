@@ -14,28 +14,38 @@
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        // Haritayı başlat
-        var map = L.map('map').setView([38, 35], 5); // Türkiye merkez, zoom 5
+        var map = L.map('map').setView([20, 0], 2);
 
-        // Dünya haritası (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // Örnek ülke sınırı (Türkiye gibi polygon)
-        var boundary = L.polygon([
-            [42, 26],
-            [42, 45],
-            [36, 45],
-            [36, 26]
-        ], {
-            color: 'red',
-            weight: 2,
-            fillOpacity: 0.1
-        }).addTo(map);
+        // Tüm dünya ülke sınırlarını yükle
+        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+            .then(res => res.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: {
+                        color: "red",
+                        weight: 1,
+                        fillOpacity: 0
+                    }
+                }).addTo(map);
+            });
 
-        // Haritaya tıklandığında küçük pixel koy
+        // localStorage'dan pixel'leri yükle
+        var pixels = JSON.parse(localStorage.getItem('pixels') || '[]');
+        pixels.forEach(function(latlng) {
+            L.circleMarker(latlng, {
+                radius: 3,
+                color: 'blue',
+                fillColor: '#30f',
+                fillOpacity: 0.9
+            }).addTo(map);
+        });
+
+        // Tıklayınca pixel ekle + kaydet
         map.on('click', function(e) {
             L.circleMarker(e.latlng, {
                 radius: 3,
@@ -43,6 +53,9 @@
                 fillColor: '#30f',
                 fillOpacity: 0.9
             }).addTo(map);
+
+            pixels.push(e.latlng);
+            localStorage.setItem('pixels', JSON.stringify(pixels));
         });
     </script>
 </body>
