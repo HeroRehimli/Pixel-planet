@@ -16,18 +16,19 @@
     <script>
         var map = L.map('map').setView([20, 0], 2);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Pixel Planet tarzı minimalist gri harita
+        L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
-            attribution: '© OpenStreetMap'
+            attribution: '© Stadia Maps, © OpenMapTiles, © OpenStreetMap'
         }).addTo(map);
 
-        // Tüm dünya ülke sınırlarını yükle
+        // Ülke sınır çizgileri (GeoJSON)
         fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
             .then(res => res.json())
             .then(data => {
                 L.geoJSON(data, {
                     style: {
-                        color: "red",
+                        color: "#555",
                         weight: 1,
                         fillOpacity: 0
                     }
@@ -39,18 +40,18 @@
         pixels.forEach(function(latlng) {
             L.circleMarker(latlng, {
                 radius: 3,
-                color: 'blue',
-                fillColor: '#30f',
+                color: '#3498db',
+                fillColor: '#3498db',
                 fillOpacity: 0.9
             }).addTo(map);
         });
 
-        // Tıklayınca pixel ekle + kaydet
+        // Haritaya tıklayınca pixel ekle ve kaydet
         map.on('click', function(e) {
             L.circleMarker(e.latlng, {
                 radius: 3,
-                color: 'blue',
-                fillColor: '#30f',
+                color: '#3498db',
+                fillColor: '#3498db',
                 fillOpacity: 0.9
             }).addTo(map);
 
