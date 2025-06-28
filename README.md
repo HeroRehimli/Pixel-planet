@@ -44,4 +44,4 @@
     drawing = true;
     drawPixel(e.offsetX, e.offsetY);
   });
-  canvas.addEventListener('mouseup', e => {
+  canvas.addEventListener('mouseup', e => { 
