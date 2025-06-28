@@ -20,4 +20,62 @@
   <h1>My Pixel Planet</h1>
   <canvas id="canvas" width="1000" height="500"></canvas>
   <div id="colors">
-    <
+    <button style="background:red" onclick="setColor('red')"></button>
+    <button style="background:green" onclick="setColor('green')"></button>
+    <button style="background:blue" onclick="setColor('blue')"></button>
+    <button style="background:yellow" onclick="setColor('yellow')"></button>
+    <button style="background:black" onclick="setColor('black')"></button>
+    <button style="background:white; border:1px solid #ccc;" onclick="setColor('white')"></button>
+  </div>
+
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let currentColor = 'black';
+  let drawing = false;
+
+  function setColor(color) {
+    currentColor = color;
+  }
+
+  function drawPixel(x, y) {
+    const size = 5;
+    ctx.fillStyle = currentColor;
+    ctx.fillRect(Math.floor(x/size)*size, Math.floor(y/size)*size, size, size);
+  }
+
+  // Mouse events
+  canvas.addEventListener('mousedown', e => { 
+    drawing = true; 
+    drawPixel(e.offsetX, e.offsetY); 
+  });
+  canvas.addEventListener('mouseup', () => drawing = false);
+  canvas.addEventListener('mouseleave', () => drawing = false);
+  canvas.addEventListener('mousemove', e => { 
+    if (drawing) drawPixel(e.offsetX, e.offsetY); 
+  });
+
+  // Touch events
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    drawing = true;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.touches[0].clientX - rect.left;
+    const y = e.touches[0].clientY - rect.top;
+    drawPixel(x, y);
+  }, {passive: false});
+
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.touches[0].clientX - rect.left;
+    const y = e.touches[0].clientY - rect.top;
+    drawPixel(x, y);
+  }, {passive: false});
+
+  canvas.addEventListener('touchend', () => drawing = false);
+  canvas.addEventListener('touchcancel', () => drawing = false);
+</script>
+</body>
+  </html>
