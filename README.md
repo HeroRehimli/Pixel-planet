@@ -24,4 +24,38 @@
   </div>
 
 <script>
-  const canvas = 
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let currentColor = 'black';
+  let drawing = false;
+
+  function setColor(color) {
+    currentColor = color;
+  }
+
+  function drawPixel(x, y) {
+    const size = 10;
+    ctx.fillStyle = currentColor;
+    ctx.fillRect(Math.floor(x / size) * size, Math.floor(y / size) * size, size, size);
+  }
+
+  // Fare için
+  canvas.addEventListener('mousedown', e => {
+    drawing = true;
+    drawPixel(e.offsetX, e.offsetY);
+  });
+  canvas.addEventListener('mouseup', e => {
+    drawing = false;
+  });
+  canvas.addEventListener('mouseleave', e => {
+    drawing = false;
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (drawing) drawPixel(e.offsetX, e.offsetY);
+  });
+
+  // Dokunmatik için
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    for(let touch of 
