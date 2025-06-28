@@ -36,16 +36,4 @@
   function drawPixel(x, y) {
     const size = 5; 
     ctx.fillStyle = currentColor;
-    ctx.fillRect(Math.floor(x/size)*size, Math.floor(y/size)*size, size, size);
-  }
-
-  canvas.addEventListener('mousedown', e => { drawing = true; drawPixel(e.offsetX, e.offsetY); });
-  canvas.addEventListener('mouseup', () => drawing = false);
-  canvas.addEventListener('mouseleave', () => drawing = false);
-  canvas.addEventListener('mousemove', e => { if (drawing) drawPixel(e.offsetX, e.offsetY); });
-
-  canvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    drawing = true;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.touches[0].client
+    ctx.fillRect(Math.floor(x
