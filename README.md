@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Pixel Planet</title>
-  <style>
-    body { display: flex; flex-direction: column; align-items: center; font-family: sans-serif; }
-    canvas { border: 1px solid #000; touch-action: none; }
-    #colors { margin-top: 10px; }
-    button { width: 30px; height: 30px; margin: 2px; border: none; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Pixel Planet</title>
+<style>
+  body { display: flex; flex-direction: column; align-items: center; font-family: sans-serif; }
+  canvas { border: 1px solid #000; touch-action: none; }
+  #colors { margin-top: 10px; }
+  button { width: 30px; height: 30px; margin: 2px; border: none; }
+</style>
 </head>
 <body>
   <h1>My Pixel Planet</h1>
@@ -20,5 +20,60 @@
     <button style="background:blue" onclick="setColor('blue')"></button>
     <button style="background:yellow" onclick="setColor('yellow')"></button>
     <button style="background:black" onclick="setColor('black')"></button>
-    <button style="background:white;# Pixel-planet
-Pixel
+    <button style="background:white; border:1px solid #ccc;" onclick="setColor('white')"></button>
+  </div>
+
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let currentColor = 'black';
+  let drawing = false;
+
+  function setColor(color) {
+    currentColor = color;
+  }
+
+  function drawPixel(x, y) {
+    const size = 10;
+    ctx.fillStyle = currentColor;
+    ctx.fillRect(Math.floor(x / size) * size, Math.floor(y / size) * size, size, size);
+  }
+
+  // Fare için
+  canvas.addEventListener('mousedown', e => {
+    drawing = true;
+    drawPixel(e.offsetX, e.offsetY);
+  });
+  canvas.addEventListener('mouseup', e => {
+    drawing = false;
+  });
+  canvas.addEventListener('mouseleave', e => {
+    drawing = false;
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (drawing) drawPixel(e.offsetX, e.offsetY);
+  });
+
+  // Dokunmatik için
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    for(let touch of e.touches){
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      drawPixel(x, y);
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    for(let touch of e.touches){
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      drawPixel(x, y);
+    }
+  }, { passive: false });
+</script>
+</body>
+</html>
