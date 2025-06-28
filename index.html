@@ -1,45 +1,49 @@
-DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>My Pixel Planet</title>
-<style>
-  body { display: flex; flex-direction: column; align-items: center; font-family: sans-serif; margin: 0; }
-  canvas { 
-    border: 1px solid #000; 
-    background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/World_map_blank_without_borders.svg/1200px-World_map_blank_without_borders.svg.png') no-repeat center center; 
-    background-size: cover; 
-    touch-action: none;
-  }
-  #colors { margin: 10px; }
-  button { width: 30px; height: 30px; margin: 2px; border: none; border-radius: 4px; }
-</style>
+    <title>Pixel Planet</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 100vh; width: 100%; }
+    </style>
 </head>
 <body>
-  <h1>My Pixel Planet</h1>
-  <canvas id="canvas" width="1000" height="500"></canvas>
-  <div id="colors">
-    <button style="background:red" onclick="setColor('red')"></button>
-    <button style="background:green" onclick="setColor('green')"></button>
-    <button style="background:blue" onclick="setColor('blue')"></button>
-    <button style="background:yellow" onclick="setColor('yellow')"></button>
-    <button style="background:black" onclick="setColor('black')"></button>
-    <button style="background:white; border:1px solid #ccc;" onclick="setColor('white')"></button>
-  </div>
+    <div id="map"></div>
 
-<script>
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  let currentColor = 'black';
-  let drawing = false;
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Haritayı başlat
+        var map = L.map('map').setView([38, 35], 5); // Türkiye merkez, zoom 5
 
-  function setColor(color) {
-    currentColor = color;
-  }
+        // Dünya haritası (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-  function drawPixel(x, y) {
-    const size = 5;
-    ctx.fillStyle = currentColor;
-    ctx.fillRect(Math.floor(x/size)*size, Math.floor(y/size)*size, size, size);
-  }
+        // Örnek ülke sınırı (Türkiye gibi polygon)
+        var boundary = L.polygon([
+            [42, 26],
+            [42, 45],
+            [36, 45],
+            [36, 26]
+        ], {
+            color: 'red',
+            weight: 2,
+            fillOpacity: 0.1
+        }).addTo(map);
+
+        // Haritaya tıklandığında küçük pixel koy
+        map.on('click', function(e) {
+            L.circleMarker(e.latlng, {
+                radius: 3,
+                color: 'blue',
+                fillColor: '#30f',
+                fillOpacity: 0.9
+            }).addTo(map);
+        });
+    </script>
+</body>
+</html>
